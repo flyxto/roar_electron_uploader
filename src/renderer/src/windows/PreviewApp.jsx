@@ -1,6 +1,23 @@
 import { useState, useEffect, useRef } from 'react'
 import QRCode from 'qrcode'
+import roaradxWhiteLogo from '../assets/roaradx-white-logo.svg'
 import './PreviewApp.css'
+
+// Deterministic mock TikTok interactions based on videoId (like in tik-tok-kiosk)
+function getInteractions(videoId) {
+  if (!videoId) return { likes: '8.4k', comments: '124' }
+  let hash = 0
+  const str = String(videoId)
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i)
+    hash |= 0
+  }
+  const abs = Math.abs(hash)
+  const likesRaw = (abs % 9000) + 1200
+  const likes = (likesRaw / 1000).toFixed(1) + 'k'
+  const comments = (abs % 450) + 24
+  return { likes, comments }
+}
 
 // Hardcoded TV display configuration
 const DISPLAY_CONFIG = {
@@ -46,6 +63,11 @@ export default function PreviewApp() {
   // The displayed video for QR & details updates immediately when transition begins
   const displayedIndex = isTransitioning ? (currentIndex + 1) % (queue.length || 1) : currentIndex
   const displayedVideo = queue.length > 0 ? queue[displayedIndex] : null
+
+  const curVideo = queue[currentIndex] || null
+  const nextVideo = queue.length > 0 ? queue[(currentIndex + 1) % queue.length] : null
+  const videoSlot0 = activeSlot === 0 ? curVideo : nextVideo
+  const videoSlot1 = activeSlot === 1 ? curVideo : nextVideo
 
   // Load history from backend on mount and build queue with local files ONLY
   useEffect(() => {
@@ -376,31 +398,42 @@ export default function PreviewApp() {
                   onClick={() => startScrollTransition()}
                   title="Click to scroll to next video"
                 >
-                  <video
-                    ref={videoRefA}
-                    className={`tiktok-video-item ${getSlotClass(0)}`}
-                    onEnded={() => {
-                      if (activeSlot === 0 && !isTransitioning) startScrollTransition()
-                    }}
-                    onError={() => {
-                      if (activeSlot === 0 && !isTransitioning) setTimeout(startScrollTransition, 1500)
-                    }}
+                  <div
+                    className={`tiktok-slot-card ${getSlotClass(0)}`}
                     onTransitionEnd={handleTransitionEnd}
-                    playsInline
-                    autoPlay
-                  />
-                  <video
-                    ref={videoRefB}
-                    className={`tiktok-video-item ${getSlotClass(1)}`}
-                    onEnded={() => {
-                      if (activeSlot === 1 && !isTransitioning) startScrollTransition()
-                    }}
-                    onError={() => {
-                      if (activeSlot === 1 && !isTransitioning) setTimeout(startScrollTransition, 1500)
-                    }}
+                  >
+                    <video
+                      ref={videoRefA}
+                      className="tiktok-video-item"
+                      onEnded={() => {
+                        if (activeSlot === 0 && !isTransitioning) startScrollTransition()
+                      }}
+                      onError={() => {
+                        if (activeSlot === 0 && !isTransitioning) setTimeout(startScrollTransition, 1500)
+                      }}
+                      playsInline
+                      autoPlay
+                    />
+                    <TikTokVideoOverlay videoData={videoSlot0} />
+                  </div>
+
+                  <div
+                    className={`tiktok-slot-card ${getSlotClass(1)}`}
                     onTransitionEnd={handleTransitionEnd}
-                    playsInline
-                  />
+                  >
+                    <video
+                      ref={videoRefB}
+                      className="tiktok-video-item"
+                      onEnded={() => {
+                        if (activeSlot === 1 && !isTransitioning) startScrollTransition()
+                      }}
+                      onError={() => {
+                        if (activeSlot === 1 && !isTransitioning) setTimeout(startScrollTransition, 1500)
+                      }}
+                      playsInline
+                    />
+                    <TikTokVideoOverlay videoData={videoSlot1} />
+                  </div>
                 </div>
               </div>
 
@@ -510,4 +543,94 @@ function TikTokLogo({ className }) {
     </svg>
   )
 }
+
+function TikTokVideoOverlay({ videoData }) {
+  if (!videoData) return null
+
+  const { likes, comments } = getInteractions(videoData.videoId)
+
+  return (
+    <div className="tiktok-video-overlay">
+      {/* Dark vignette scrim gradient at the bottom for text contrast */}
+      <div className="tiktok-overlay-scrim" />
+
+      <div className="tiktok-overlay-content">
+        {/* Left Column: Roar ADX White Logo, handle, event caption, sound marquee */}
+        <div className="tiktok-meta-col">
+          <img
+            src={roaradxWhiteLogo}
+            alt="Roar ADX"
+            className="tiktok-brand-logo"
+          />
+          <div className="tiktok-handle-row">
+            <span className="tiktok-handle">@roaradx</span>
+          </div>
+          <p className="tiktok-caption">I was here at Tik Tok Accelerate</p>
+          <p className="tiktok-hashtags">#roaradx #tiktok #fun</p>
+
+          <div className="tiktok-sound-row">
+            <svg
+              className="tiktok-music-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 18V5l12-2v13" />
+              <circle cx="6" cy="18" r="3" />
+              <circle cx="18" cy="16" r="3" />
+            </svg>
+            <div className="tiktok-marquee-viewport">
+              <div className="tiktok-marquee-track">
+                <span className="tiktok-marquee-text">original sound - roaradx ♫</span>
+                <span className="tiktok-marquee-text">original sound - roaradx ♫</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Like, Comment, Share, Spinning Vinyl Record */}
+        <div className="tiktok-actions-col">
+          {/* Like Heart */}
+          <div className="tiktok-action-item">
+            <div className="tiktok-action-icon-wrap">
+              <svg className="tiktok-action-icon" viewBox="0 0 512 512" fill="currentColor">
+                <path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z" />
+              </svg>
+            </div>
+            <span className="tiktok-action-label">{likes}</span>
+          </div>
+
+          {/* Comment Bubble */}
+          <div className="tiktok-action-item">
+            <div className="tiktok-action-icon-wrap">
+              <svg className="tiktok-action-icon" viewBox="0 0 512 512" fill="currentColor">
+                <path d="M256 32C114.6 32 0 125.1 0 240c0 49.6 21.4 95 57 130.7C44.5 421.1 2.7 466 2.2 466.5c-2.2 2.3-2.8 5.7-1.5 8.7S4.8 480 8 480c66.3 0 116-31.8 140.6-51.4 32.7 12.3 69 19.4 107.4 19.4 141.4 0 256-93.1 256-208S397.4 32 256 32zM128 272c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm128 0c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm128 0c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z" />
+              </svg>
+            </div>
+            <span className="tiktok-action-label">{comments}</span>
+          </div>
+
+          {/* Share */}
+          <div className="tiktok-action-item">
+            <div className="tiktok-action-icon-wrap">
+              <svg className="tiktok-action-icon" viewBox="0 0 512 512" fill="currentColor">
+                <path d="M448 240L296 88v96C112 184 64 304 64 424c48-64 112-96 232-96v96l152-152z" />
+              </svg>
+            </div>
+            <span className="tiktok-action-label">share</span>
+          </div>
+
+          {/* Spinning Vinyl Record */}
+          <div className="tiktok-vinyl-disc animate-spin-slow">
+            <div className="tiktok-vinyl-hub" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 
