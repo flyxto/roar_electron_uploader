@@ -6,6 +6,7 @@ import { processVideo } from './ffmpeg-processor'
 import { uploadToR2 } from './r2-uploader'
 import { saveReelToMongo } from './api-client'
 import { startWatcher, stopWatcher } from './watcher'
+import { syncManager } from './sync-manager'
 
 // Track active jobs: Map<jobId, { status, progress, videoId, ... }>
 const activeJobs = new Map()
@@ -159,7 +160,8 @@ async function runPipeline(filePath, getPreviewWindowFn) {
         localPath: outputPath,
         cloudflareUrl,
         publicUrl,
-        videoId
+        videoId,
+        jumpImmediately: true
       })
     }
 
@@ -174,11 +176,37 @@ async function runPipeline(filePath, getPreviewWindowFn) {
 }
 
 export function setupIpcHandlers(getPreviewWindowFn) {
+  // Wire up background sync manager to notify preview window
+  syncManager.setDownloadedCallback((item) => {
+    const pw = getPreviewWindowFn()
+    if (pw && !pw.isDestroyed()) {
+      pw.webContents.send('show-video', {
+        videoId: item.reelId,
+        localPath: item.localPath,
+        publicUrl: item.videoUrl,
+        cloudflareUrl: item.cloudflareUrl,
+        jumpImmediately: false,
+        isBackgroundSync: true
+      })
+    }
+  })
+
   // ---- Settings ----
   ipcMain.handle('get-settings', () => getSettings())
 
-  ipcMain.handle('update-settings', (_event, partial) => {
+  ipcMain.handle('update-settings', async (_event, partial) => {
     const updated = updateSettings(partial)
+    if (partial.outputFolder && updated.outputFolder) {
+      try {
+        const axios = (await import('axios')).default
+        if (updated.backendApiUrl) {
+          const url = `${updated.backendApiUrl.replace(/\/$/, '')}/api/reels`
+          const response = await axios.get(url, { timeout: 10000 })
+          const reels = response.data?.data || []
+          syncManager.enqueueMissingReels(reels, updated)
+        }
+      } catch (_) {}
+    }
     return updated
   })
 
@@ -228,8 +256,33 @@ export function setupIpcHandlers(getPreviewWindowFn) {
   // ---- Fetch history from backend ----
   ipcMain.handle('fetch-history', async () => {
     const settings = getSettings()
-    if (!settings.backendApiUrl) return []
+    const outputFolder = settings.outputFolder || ''
+
+    const getLocalProcessedFiles = () => {
+      if (!outputFolder || !fs.existsSync(outputFolder)) return []
+      try {
+        return fs
+          .readdirSync(outputFolder)
+          .filter((f) => f.endsWith('_processed.mp4'))
+          .map((f) => {
+            const reelId = f.replace('_processed.mp4', '')
+            return {
+              reelId,
+              videoUrl: `${settings.reelBaseUrl}/${reelId}`,
+              cloudflareUrl: settings.r2PublicUrl ? `${settings.r2PublicUrl.replace(/\/$/, '')}/reels/${f}` : '',
+              localPath: join(outputFolder, f)
+            }
+          })
+      } catch (e) {
+        return []
+      }
+    }
+
     try {
+      if (!settings.backendApiUrl) {
+        return getLocalProcessedFiles()
+      }
+
       const axios = (await import('axios')).default
       const url = `${settings.backendApiUrl.replace(/\/$/, '')}/api/reels`
       const response = await axios.get(url, { timeout: 10000 })
@@ -238,22 +291,40 @@ export function setupIpcHandlers(getPreviewWindowFn) {
       // Return oldest-first so the preview plays in chronological order
       const sorted = [...reels].reverse()
       // Attach local file path if the processed file exists in outputFolder
-      const outputFolder = settings.outputFolder || ''
       const mappedReels = sorted.map((reel) => {
         const localFile = outputFolder
           ? join(outputFolder, `${reel.reelId}_processed.mp4`)
           : null
         const localExists = localFile && fs.existsSync(localFile)
+        let hasSize = false
+        if (localExists) {
+          try {
+            hasSize = fs.statSync(localFile).size > 0
+          } catch (_) {}
+        }
         return {
           ...reel,
-          localPath: localExists ? localFile : null
+          localPath: localExists && hasSize ? localFile : null
         }
       })
-      console.log(`[Preview] Loaded ${mappedReels.length} history items. First item localPath: ${mappedReels[0]?.localPath || 'NULL'}`)
+
+      // Also merge any local files on disk that might not be in backend yet
+      const localFiles = getLocalProcessedFiles()
+      for (const local of localFiles) {
+        if (!mappedReels.some((r) => String(r.reelId) === String(local.reelId))) {
+          mappedReels.push(local)
+        }
+      }
+
+      console.log(`[Preview] Loaded ${mappedReels.length} history items. Local items: ${mappedReels.filter((r) => r.localPath).length}`)
+
+      // Enqueue any missing reels to download in background
+      syncManager.enqueueMissingReels(mappedReels, settings)
+
       return mappedReels
     } catch (err) {
       console.error('Fetch history error:', err.message)
-      return []
+      return getLocalProcessedFiles()
     }
   })
 
@@ -262,15 +333,14 @@ export function setupIpcHandlers(getPreviewWindowFn) {
     try {
       // 1. Clear local processed array
       updateSettings({ processedVideos: [] })
-      console.log('Local processedVideos cleared')
+      syncManager.clearQueue()
+      console.log('Local processedVideos and sync queue cleared')
 
       // 2. Clear backend MongoDB
       const settings = getSettings()
       if (settings.backendApiUrl) {
         const axios = (await import('axios')).default
         const url = `${settings.backendApiUrl.replace(/\/$/, '')}/api/reels`
-        // We will send a DELETE request to clear all if the backend supports it.
-        // Actually, let's just make a loop to delete them all one by one if no bulk endpoint exists
         const response = await axios.get(url, { timeout: 10000 })
         const reels = response.data?.data || []
         for (const reel of reels) {
@@ -289,7 +359,7 @@ export function setupIpcHandlers(getPreviewWindowFn) {
   ipcMain.on('preview-video', (_event, data) => {
     const pw = getPreviewWindowFn()
     if (pw && !pw.isDestroyed()) {
-      pw.webContents.send('show-video', data)
+      pw.webContents.send('show-video', { ...data, jumpImmediately: true })
     }
   })
 

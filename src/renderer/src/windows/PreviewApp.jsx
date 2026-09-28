@@ -8,20 +8,29 @@ export default function PreviewApp() {
   const [qrDataUrl, setQrDataUrl] = useState(null)
   const videoRef = useRef(null)
 
-  // Load history from backend on mount and build queue
+  const queueRef = useRef(queue)
+  queueRef.current = queue
+
+  // Load history from backend on mount and build queue with local files ONLY
   useEffect(() => {
     async function initQueue() {
       try {
         const result = await window.api.fetchHistory()
         if (Array.isArray(result) && result.length > 0) {
-          const historyQueue = result.map((item) => ({
-            videoId: item.reelId,
-            publicUrl: item.videoUrl,
-            cloudflareUrl: item.cloudflareUrl,
-            localPath: item.localPath || null
-          }))
-          setQueue(historyQueue)
-          setCurrentIndex(0)
+          // Strictly only include items that exist locally on disk in output folder
+          const localQueue = result
+            .filter((item) => Boolean(item.localPath))
+            .map((item) => ({
+              videoId: item.reelId,
+              publicUrl: item.videoUrl,
+              cloudflareUrl: item.cloudflareUrl,
+              localPath: item.localPath
+            }))
+
+          if (localQueue.length > 0) {
+            setQueue(localQueue)
+            setCurrentIndex(0)
+          }
         }
       } catch (err) {
         console.error('Failed to load preview history:', err)
@@ -30,12 +39,29 @@ export default function PreviewApp() {
     initQueue()
   }, [])
 
-  // Listen for newly processed videos — jump to them immediately
+  // Listen for newly processed or background downloaded videos
   useEffect(() => {
     const unsub = window.api.onShowVideo((data) => {
+      if (!data || !data.localPath) return
+
       setQueue((prev) => {
+        const existingIndex = prev.findIndex((v) => String(v.videoId) === String(data.videoId))
+        if (existingIndex !== -1) {
+          const updated = [...prev]
+          updated[existingIndex] = { ...updated[existingIndex], ...data }
+          return updated
+        }
+
         const newQueue = [...prev, data]
-        setCurrentIndex(newQueue.length - 1) // jump to newest
+
+        if (data.jumpImmediately) {
+          setCurrentIndex(newQueue.length - 1)
+        } else if (prev.length === 0) {
+          setCurrentIndex(0)
+        }
+        // If jumpImmediately is false and prev had items (e.g. background sync download),
+        // currentIndex is untouched so the playing video continues uninterrupted!
+
         return newQueue
       })
     })
@@ -85,13 +111,19 @@ export default function PreviewApp() {
   useEffect(() => {
     if (!videoData || !videoRef.current) return
 
-    // Use local file if available, otherwise stream from Cloudflare
-    // We MUST use encodeURI to convert spaces (like "1000 16.23.29") to %20, otherwise <video src> fails to load
-    const src = videoData.localPath
-      ? `file://${encodeURI(videoData.localPath)}`
-      : videoData.cloudflareUrl
+    // STRICTLY local playback only from output folder. Never stream from online URLs.
+    if (!videoData.localPath) {
+      console.warn(`[PreviewApp] Reel #${videoData.videoId} has no local file. Skipping online playback.`)
+      return
+    }
 
-    if (!src) return
+    // Normalize Windows backslashes to forward slashes
+    let normalizedPath = videoData.localPath.replace(/\\/g, '/')
+    // Ensure it starts with a slash if it's a Windows drive letter
+    if (!normalizedPath.startsWith('/')) {
+      normalizedPath = '/' + normalizedPath
+    }
+    const src = `file://${encodeURI(normalizedPath)}`
 
     const video = videoRef.current
     video.src = src
@@ -101,6 +133,11 @@ export default function PreviewApp() {
       const errMessage = video.error ? `${video.error.code} - ${video.error.message}` : 'Unknown'
       console.error('Video load error for:', src, video.error)
       window.api.sendAppLog && window.api.sendAppLog({ type: 'error', message: `Video load error [${errMessage}] for: ${src}` })
+      
+      // Auto-advance to next video after brief pause so playback isn't stalled indefinitely
+      setTimeout(() => {
+        handleVideoEnd()
+      }, 2000)
     }
 
     // Autoplay — muted first to pass browser autoplay policy, then unmute
@@ -130,10 +167,11 @@ export default function PreviewApp() {
     }
   }, [currentIndex, videoData?.videoId])
 
-  // When video ends → advance to next, loop back to 0
+  // When video ends → advance to next, loop back to 0 using latest queueRef
   const handleVideoEnd = () => {
-    if (queue.length === 0) return
-    setCurrentIndex((prev) => (prev + 1) % queue.length)
+    const currentQueue = queueRef.current
+    if (currentQueue.length === 0) return
+    setCurrentIndex((prev) => (prev + 1) % currentQueue.length)
   }
 
   return (
@@ -171,7 +209,7 @@ export default function PreviewApp() {
                 </svg>
               </div>
               <p className="idle-title">Waiting for video...</p>
-              <p className="idle-sub">Process a video from the uploader to preview it here</p>
+              <p className="idle-sub">Videos will preview here once available in your output folder</p>
               <div className="idle-dot-ring">
                 <div className="dot-ring" />
                 <div className="dot-ring dot-ring-2" />
