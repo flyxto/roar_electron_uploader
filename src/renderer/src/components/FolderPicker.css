@@ -1,0 +1,51 @@
+.folder-picker {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fp-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fp-icon {
+  display: flex;
+  align-items: center;
+}
+
+.fp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fp-path {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.fp-path-text {
+  color: var(--text-primary);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.fp-placeholder {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}

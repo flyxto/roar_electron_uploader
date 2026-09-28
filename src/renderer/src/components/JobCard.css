@@ -1,0 +1,134 @@
+.job-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.job-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-elevated);
+}
+
+.job-card.done {
+  border-color: rgba(16,185,129,0.2);
+}
+
+.job-card.error {
+  border-color: rgba(239,68,68,0.2);
+}
+
+.job-card.processing,
+.job-card.uploading,
+.job-card.saving {
+  border-color: rgba(59,130,246,0.2);
+}
+
+.job-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.job-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.job-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.job-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.job-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Progress */
+.job-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.job-progress .progress-bar {
+  flex: 1;
+}
+
+.progress-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-light);
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* URLs */
+.job-urls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+}
+
+.url-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.url-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 50px;
+}
+
+.url-value {
+  font-size: 11px;
+  color: var(--text-secondary);
+  flex: 1;
+  min-width: 0;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Error */
+.job-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--danger);
+  background: var(--danger-dim);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
