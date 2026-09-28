@@ -40,9 +40,14 @@ function toLocalVideoSrc(localPath) {
 export default function PreviewApp() {
   const [queue, setQueue] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [targetIndex, setTargetIndex] = useState(0)
+  const [priorityVersion, setPriorityVersion] = useState(0)
   const [activeSlot, setActiveSlot] = useState(0) // 0 for Slot A, 1 for Slot B
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState(null)
+
+  const priorityQueueRef = useRef([])
+  const resumeIndexRef = useRef(null)
 
   const videoRefA = useRef(null)
   const videoRefB = useRef(null)
@@ -60,12 +65,33 @@ export default function PreviewApp() {
   const isTransitioningRef = useRef(isTransitioning)
   isTransitioningRef.current = isTransitioning
 
+  // Determine the next video in line: priority downloaded videos play next once, then regular loop resumes
+  const getNextTarget = (curIdx, curQueue) => {
+    if (!curQueue || curQueue.length === 0) return { nextIndex: 0, isPriority: false }
+
+    if (priorityQueueRef.current.length > 0) {
+      const pId = priorityQueueRef.current[0]
+      const idx = curQueue.findIndex((v) => String(v.videoId) === String(pId))
+      if (idx !== -1) {
+        return { nextIndex: idx, isPriority: true, priorityId: pId }
+      }
+    }
+
+    if (resumeIndexRef.current !== null) {
+      const rIdx = resumeIndexRef.current % curQueue.length
+      return { nextIndex: rIdx, isResume: true }
+    }
+
+    return { nextIndex: (curIdx + 1) % curQueue.length, isPriority: false }
+  }
+
   // The displayed video for QR & details updates immediately when transition begins
-  const displayedIndex = isTransitioning ? (currentIndex + 1) % (queue.length || 1) : currentIndex
+  const displayedIndex = isTransitioning ? targetIndex : currentIndex
   const displayedVideo = queue.length > 0 ? queue[displayedIndex] : null
 
   const curVideo = queue[currentIndex] || null
-  const nextVideo = queue.length > 0 ? queue[(currentIndex + 1) % queue.length] : null
+  const upcomingTarget = getNextTarget(currentIndex, queue)
+  const nextVideo = queue.length > 0 ? queue[upcomingTarget.nextIndex] : null
   const videoSlot0 = activeSlot === 0 ? curVideo : nextVideo
   const videoSlot1 = activeSlot === 1 ? curVideo : nextVideo
 
@@ -111,9 +137,13 @@ export default function PreviewApp() {
 
         const newQueue = [...prev, data]
 
-        if (data.jumpImmediately) {
-          setCurrentIndex(newQueue.length - 1)
-        } else if (prev.length === 0) {
+        if (prev.length > 0) {
+          // Play newly downloaded video right after current video completely finishes (Option 1)
+          if (!priorityQueueRef.current.includes(data.videoId)) {
+            priorityQueueRef.current.push(data.videoId)
+          }
+          setPriorityVersion((v) => v + 1)
+        } else {
           setCurrentIndex(0)
         }
 
@@ -129,6 +159,8 @@ export default function PreviewApp() {
     const curQueue = queueRef.current
     if (curQueue.length === 0) return
 
+    const target = getNextTarget(currentIndexRef.current, curQueue)
+    setTargetIndex(target.nextIndex)
     setIsTransitioning(true)
 
     // Play incoming video as it scrolls in from bottom
@@ -164,7 +196,20 @@ export default function PreviewApp() {
 
     const currentSlot = activeSlotRef.current
     const newActiveSlot = currentSlot === 0 ? 1 : 0
-    const nextCurIndex = (currentIndexRef.current + 1) % curQueue.length
+    const target = getNextTarget(currentIndexRef.current, curQueue)
+    const nextCurIndex = target.nextIndex
+
+    if (target.isPriority) {
+      // Save where normal playlist was heading so it resumes cleanly after priority video
+      if (resumeIndexRef.current === null) {
+        resumeIndexRef.current = (currentIndexRef.current + 1) % curQueue.length
+      }
+      priorityQueueRef.current = priorityQueueRef.current.filter((id) => String(id) !== String(target.priorityId))
+      setPriorityVersion((v) => v + 1)
+    } else if (target.isResume) {
+      // Resumed back to regular playlist; clear resume pointer
+      resumeIndexRef.current = null
+    }
 
     // Pause outgoing video that is now off-screen
     const outgoingRef = currentSlot === 0 ? videoRefA.current : videoRefB.current
@@ -174,8 +219,8 @@ export default function PreviewApp() {
     }
 
     // Preload next upcoming video into the outgoing slot
-    const upcomingIndex = (nextCurIndex + 1) % curQueue.length
-    const upcomingReel = curQueue[upcomingIndex]
+    const upcomingTarget = getNextTarget(nextCurIndex, curQueue)
+    const upcomingReel = curQueue[upcomingTarget.nextIndex]
     if (outgoingRef && upcomingReel && upcomingReel.localPath) {
       const upcomingSrc = toLocalVideoSrc(upcomingReel.localPath)
       outgoingRef.setAttribute('data-src', upcomingReel.localPath)
@@ -208,8 +253,8 @@ export default function PreviewApp() {
     if (queue.length === 0) return
 
     const cur = queue[currentIndex]
-    const nextIdx = (currentIndex + 1) % queue.length
-    const nxt = queue[nextIdx]
+    const nextTarget = getNextTarget(currentIndex, queue)
+    const nxt = queue[nextTarget.nextIndex]
 
     if (activeSlot === 0) {
       if (videoRefA.current && cur?.localPath) {
@@ -262,7 +307,7 @@ export default function PreviewApp() {
         }
       }
     }
-  }, [queue.length, queue[currentIndex]?.videoId])
+  }, [queue.length, queue[currentIndex]?.videoId, priorityVersion])
 
   // Emit status when displayed video changes
   useEffect(() => {
@@ -284,10 +329,14 @@ export default function PreviewApp() {
         if (control.action === 'next') {
           startScrollTransition()
         } else if (control.action === 'prev') {
+          priorityQueueRef.current = []
+          resumeIndexRef.current = null
           setCurrentIndex((prev) => (prev - 1 + queue.length) % queue.length)
         } else if (control.action === 'play-id') {
           const index = queue.findIndex((v) => String(v.videoId) === String(control.value))
           if (index !== -1) {
+            priorityQueueRef.current = []
+            resumeIndexRef.current = null
             setCurrentIndex(index)
           }
         }
