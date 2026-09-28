@@ -1,11 +1,444 @@
 .preview-app {
   width: 100vw;
   height: 100vh;
-  background: #000;
+  background: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  position: relative;
+}
+
+/* Floating animated background container */
+.floating-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floating-icon {
+  position: absolute;
+  bottom: -180px;
+  filter: drop-shadow(0 0 16px rgba(0, 247, 239, 0.35)) drop-shadow(0 0 24px rgba(255, 0, 79, 0.35));
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.floating-icon-1 {
+  width: 85px;
+  height: 85px;
+  left: 4%;
+  --target-opacity: 0.55;
+  animation: floatUp1 13s linear infinite;
+  animation-delay: -2s;
+}
+
+.floating-icon-2 {
+  width: 130px;
+  height: 130px;
+  left: 14%;
+  --target-opacity: 0.38;
+  animation: floatUp2 19s linear infinite;
+  animation-delay: -11s;
+}
+
+.floating-icon-3 {
+  width: 70px;
+  height: 70px;
+  left: 1%;
+  --target-opacity: 0.6;
+  animation: floatUp3 11s linear infinite;
+  animation-delay: -6s;
+}
+
+.floating-icon-4 {
+  width: 100px;
+  height: 100px;
+  right: 4%;
+  --target-opacity: 0.5;
+  animation: floatUp4 15s linear infinite;
+  animation-delay: -4s;
+}
+
+.floating-icon-5 {
+  width: 155px;
+  height: 155px;
+  right: 14%;
+  --target-opacity: 0.32;
+  filter: blur(1.5px) drop-shadow(0 0 32px rgba(255, 0, 79, 0.4));
+  animation: floatUp1 22s linear infinite;
+  animation-delay: -14s;
+}
+
+.floating-icon-6 {
+  width: 75px;
+  height: 75px;
+  right: 1%;
+  --target-opacity: 0.55;
+  animation: floatUp2 12s linear infinite;
+  animation-delay: -8s;
+}
+
+.floating-icon-7 {
+  width: 110px;
+  height: 110px;
+  left: 24%;
+  --target-opacity: 0.26;
+  filter: blur(1.5px) drop-shadow(0 0 24px rgba(0, 247, 239, 0.35));
+  animation: floatUp3 17s linear infinite;
+  animation-delay: -5s;
+}
+
+.floating-icon-8 {
+  width: 120px;
+  height: 120px;
+  right: 23%;
+  --target-opacity: 0.26;
+  filter: blur(1.5px) drop-shadow(0 0 28px rgba(255, 0, 79, 0.35));
+  animation: floatUp4 18s linear infinite;
+  animation-delay: -12s;
+}
+
+/* Tiny lightweight floating particles (GPU-composited via translate3d) */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.p-cyan {
+  background: #00F7EF;
+  box-shadow: 0 0 8px rgba(0, 247, 239, 0.8), 0 0 16px rgba(0, 247, 239, 0.4);
+}
+
+.p-pink {
+  background: #FF004F;
+  box-shadow: 0 0 8px rgba(255, 0, 79, 0.8), 0 0 16px rgba(255, 0, 79, 0.4);
+}
+
+.p-white {
+  background: #FFFFFF;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.9), 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+.p1 { width: 3px; height: 3px; top: 20%; left: 12%; animation: particleDrift1 5s ease-in-out infinite alternate; }
+.p2 { width: 4px; height: 4px; top: 45%; left: 8%; animation: particleDrift2 6.5s ease-in-out infinite alternate; }
+.p3 { width: 2px; height: 2px; top: 80%; left: 14%; animation: particleDrift1 4.5s ease-in-out infinite alternate; }
+.p4 { width: 3px; height: 3px; top: 15%; right: 12%; animation: particleDrift2 5.5s ease-in-out infinite alternate; }
+.p5 { width: 4px; height: 4px; top: 50%; right: 9%; animation: particleDrift1 7s ease-in-out infinite alternate; }
+.p6 { width: 2px; height: 2px; top: 85%; right: 15%; animation: particleDrift2 4.8s ease-in-out infinite alternate; }
+.p7 { width: 3px; height: 3px; top: 30%; left: 4%; animation: particleDrift2 6s ease-in-out infinite alternate; }
+.p8 { width: 2.5px; height: 2.5px; top: 60%; left: 16%; animation: particleDrift1 5.2s ease-in-out infinite alternate; }
+.p9 { width: 3.5px; height: 3.5px; top: 25%; right: 4%; animation: particleDrift1 6.8s ease-in-out infinite alternate; }
+.p10 { width: 2px; height: 2px; top: 65%; right: 18%; animation: particleDrift2 4.2s ease-in-out infinite alternate; }
+.p11 { width: 3px; height: 3px; top: 92%; left: 10%; animation: particleDrift2 5.8s ease-in-out infinite alternate; }
+.p12 { width: 3px; height: 3px; top: 90%; right: 10%; animation: particleDrift1 6.2s ease-in-out infinite alternate; }
+.p13 { width: 2.5px; height: 2.5px; top: 10%; left: 22%; animation: particleDrift3 5.4s ease-in-out infinite alternate; }
+.p14 { width: 3.5px; height: 3.5px; top: 38%; left: 18%; animation: particleDrift2 6.8s ease-in-out infinite alternate; }
+.p15 { width: 2px; height: 2px; top: 72%; left: 24%; animation: particleDrift1 4.7s ease-in-out infinite alternate; }
+.p16 { width: 3px; height: 3px; top: 8%; right: 20%; animation: particleDrift3 6.1s ease-in-out infinite alternate; }
+.p17 { width: 4px; height: 4px; top: 40%; right: 22%; animation: particleDrift1 5.9s ease-in-out infinite alternate; }
+.p18 { width: 2.5px; height: 2.5px; top: 78%; right: 24%; animation: particleDrift2 5.1s ease-in-out infinite alternate; }
+.p19 { width: 3px; height: 3px; top: 5%; left: 50%; animation: particleDrift1 6.6s ease-in-out infinite alternate; }
+.p20 { width: 2px; height: 2px; top: 95%; left: 48%; animation: particleDrift3 4.9s ease-in-out infinite alternate; }
+.p21 { width: 3.5px; height: 3.5px; top: 52%; left: 3%; animation: particleDrift2 7.2s ease-in-out infinite alternate; }
+.p22 { width: 2px; height: 2px; top: 88%; left: 3%; animation: particleDrift1 5.3s ease-in-out infinite alternate; }
+.p23 { width: 4px; height: 4px; top: 32%; right: 3%; animation: particleDrift3 6.4s ease-in-out infinite alternate; }
+.p24 { width: 2.5px; height: 2.5px; top: 82%; right: 4%; animation: particleDrift2 5.7s ease-in-out infinite alternate; }
+.p25 { width: 3px; height: 3px; top: 3%; left: 35%; animation: particleDrift1 6.3s ease-in-out infinite alternate; }
+.p26 { width: 2px; height: 2px; top: 97%; left: 30%; animation: particleDrift3 4.4s ease-in-out infinite alternate; }
+.p27 { width: 3px; height: 3px; top: 4%; right: 35%; animation: particleDrift2 5.6s ease-in-out infinite alternate; }
+.p28 { width: 2.5px; height: 2.5px; top: 96%; right: 32%; animation: particleDrift1 6.0s ease-in-out infinite alternate; }
+
+@keyframes particleDrift1 {
+  0% { transform: translate3d(0, 0, 0) scale(0.8); opacity: 0.3; }
+  50% { transform: translate3d(15px, -25px, 0) scale(1.2); opacity: 0.85; }
+  100% { transform: translate3d(-10px, -50px, 0) scale(0.9); opacity: 0.4; }
+}
+
+@keyframes particleDrift2 {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
+  50% { transform: translate3d(-18px, -30px, 0) scale(0.7); opacity: 0.9; }
+  100% { transform: translate3d(12px, -60px, 0) scale(1.15); opacity: 0.35; }
+}
+
+@keyframes particleDrift3 {
+  0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.35; }
+  50% { transform: translate3d(20px, 20px, 0) scale(1.15); opacity: 0.95; }
+  100% { transform: translate3d(-15px, -35px, 0) scale(0.8); opacity: 0.3; }
+}
+
+@keyframes floatUp1 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.9);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--target-opacity, 0.5);
+  }
+  45% {
+    transform: translate3d(35px, calc(-45vh - 70px), 0) rotate(14deg) scale(1.05);
+  }
+  75% {
+    transform: translate3d(-15px, calc(-80vh - 120px), 0) rotate(-8deg) scale(0.98);
+  }
+  90% {
+    opacity: var(--target-opacity, 0.5);
+  }
+  100% {
+    transform: translate3d(20px, calc(-100vh - 250px), 0) rotate(18deg) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes floatUp2 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.95);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--target-opacity, 0.5);
+  }
+  40% {
+    transform: translate3d(-30px, calc(-40vh - 60px), 0) rotate(-16deg) scale(1.02);
+  }
+  70% {
+    transform: translate3d(25px, calc(-75vh - 110px), 0) rotate(10deg) scale(1);
+  }
+  90% {
+    opacity: var(--target-opacity, 0.5);
+  }
+  100% {
+    transform: translate3d(-20px, calc(-100vh - 250px), 0) rotate(-14deg) scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes floatUp3 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(5deg) scale(0.9);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--target-opacity, 0.5);
+  }
+  50% {
+    transform: translate3d(40px, calc(-50vh - 80px), 0) rotate(-12deg) scale(1.06);
+  }
+  90% {
+    opacity: var(--target-opacity, 0.5);
+  }
+  100% {
+    transform: translate3d(10px, calc(-100vh - 250px), 0) rotate(15deg) scale(0.92);
+    opacity: 0;
+  }
+}
+
+@keyframes floatUp4 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-6deg) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--target-opacity, 0.5);
+  }
+  45% {
+    transform: translate3d(-35px, calc(-48vh - 75px), 0) rotate(15deg) scale(0.94);
+  }
+  90% {
+    opacity: var(--target-opacity, 0.5);
+  }
+  100% {
+    transform: translate3d(-10px, calc(-100vh - 250px), 0) rotate(-18deg) scale(1.04);
+    opacity: 0;
+  }
+}
+
+/* Progressive Gradient Blur on top & bottom screen edges */
+.gradient-blur {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  height: calc(100vh - 77vh - 80px);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.gradient-blur-top {
+  --mask-dir: to top;
+  top: 0;
+}
+
+.gradient-blur-bottom {
+  --mask-dir: to bottom;
+  bottom: 0;
+}
+
+.gradient-blur > div,
+.gradient-blur::before,
+.gradient-blur::after {
+  position: absolute;
+  inset: 0;
+}
+
+.gradient-blur::before {
+  content: "";
+  z-index: 1;
+  -webkit-backdrop-filter: blur(0.5px);
+  backdrop-filter: blur(0.5px);
+  -webkit-mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 12.5%,
+    rgba(0, 0, 0, 1) 25%,
+    rgba(0, 0, 0, 0) 37.5%
+  );
+  mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 12.5%,
+    rgba(0, 0, 0, 1) 25%,
+    rgba(0, 0, 0, 0) 37.5%
+  );
+}
+
+.gradient-blur > div:nth-of-type(1) {
+  z-index: 2;
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
+  -webkit-mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 12.5%,
+    rgba(0, 0, 0, 1) 25%,
+    rgba(0, 0, 0, 1) 37.5%,
+    rgba(0, 0, 0, 0) 50%
+  );
+  mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 12.5%,
+    rgba(0, 0, 0, 1) 25%,
+    rgba(0, 0, 0, 1) 37.5%,
+    rgba(0, 0, 0, 0) 50%
+  );
+}
+
+.gradient-blur > div:nth-of-type(2) {
+  z-index: 3;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  -webkit-mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 25%,
+    rgba(0, 0, 0, 1) 37.5%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 62.5%
+  );
+  mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 25%,
+    rgba(0, 0, 0, 1) 37.5%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 62.5%
+  );
+}
+
+.gradient-blur > div:nth-of-type(3) {
+  z-index: 4;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  -webkit-mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 37.5%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 1) 62.5%,
+    rgba(0, 0, 0, 0) 75%
+  );
+  mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 37.5%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 1) 62.5%,
+    rgba(0, 0, 0, 0) 75%
+  );
+}
+
+.gradient-blur > div:nth-of-type(4) {
+  z-index: 5;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 1) 62.5%,
+    rgba(0, 0, 0, 1) 75%,
+    rgba(0, 0, 0, 0) 87.5%
+  );
+  mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 1) 62.5%,
+    rgba(0, 0, 0, 1) 75%,
+    rgba(0, 0, 0, 0) 87.5%
+  );
+}
+
+.gradient-blur > div:nth-of-type(5) {
+  z-index: 6;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  -webkit-mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 62.5%,
+    rgba(0, 0, 0, 1) 75%,
+    rgba(0, 0, 0, 1) 87.5%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 62.5%,
+    rgba(0, 0, 0, 1) 75%,
+    rgba(0, 0, 0, 1) 87.5%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.gradient-blur > div:nth-of-type(6) {
+  z-index: 7;
+  -webkit-backdrop-filter: blur(32px);
+  backdrop-filter: blur(32px);
+  -webkit-mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 75%,
+    rgba(0, 0, 0, 1) 87.5%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 75%,
+    rgba(0, 0, 0, 1) 87.5%,
+    rgba(0, 0, 0, 1) 100%
+  );
+}
+
+.gradient-blur::after {
+  content: "";
+  z-index: 8;
+  -webkit-backdrop-filter: blur(64px);
+  backdrop-filter: blur(64px);
+  -webkit-mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 87.5%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  mask: linear-gradient(
+    var(--mask-dir, to bottom),
+    rgba(0, 0, 0, 0) 87.5%,
+    rgba(0, 0, 0, 1) 100%
+  );
 }
 
 .tv-frame {
@@ -15,136 +448,206 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  background: transparent;
+  z-index: 2;
 }
 
 .tv-screen {
   width: 100%;
   height: 100%;
   position: relative;
-  background: #000;
+  background: transparent;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Keep video in 9:16 portrait aspect, fill height */
-.preview-video {
-  height: 100%;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
-  display: block;
-  cursor: pointer;
+/* Preview layout containing Video on top (3/4) and Promo QR card under (1/4) */
+.preview-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(12px, 1.8vh, 20px);
+  width: 100%;
+  height: 100vh;
+  padding: clamp(24px, 3.5vh, 40px) 24px;
+  box-sizing: border-box;
+  z-index: 2;
+  overflow: hidden;
 }
 
-/* Controls overlay (auto-hide) */
-.preview-overlay {
+/* Video container taking 3/4 (75%) overall size of the screen */
+.preview-stage {
+  position: relative;
+  height: 68vh;
+  max-height: 68vh;
+  aspect-ratio: 9 / 16;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000000;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+/* TikTok Vertical Feed Viewport inside .preview-stage */
+.tiktok-feed-viewport {
   position: absolute;
   inset: 0;
-  opacity: 0;
-  transition: opacity 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.tv-screen:hover .preview-overlay {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.play-btn {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.3);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #000000;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.play-btn:hover {
-  background: rgba(255,255,255,0.25);
-  transform: scale(1.1);
-}
-
-/* Info bar at the bottom-right */
-.preview-info-bar {
+.tiktok-video-item {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 20px;
-  background: linear-gradient(to top left, rgba(0,0,0,0.85) 0%, transparent 100%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: inherit;
+  will-change: transform;
 }
 
-.preview-reel-id {
+/* Slot states for snappy TikTok scrolling */
+.tiktok-slot-active {
+  transform: translate3d(0, 0, 0);
+  transition: none;
+  z-index: 2;
+}
+
+.tiktok-slot-next {
+  transform: translate3d(0, 100%, 0);
+  transition: none;
+  z-index: 2;
+}
+
+.tiktok-slot-slide-out {
+  transform: translate3d(0, -100%, 0);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 2;
+}
+
+.tiktok-slot-slide-in {
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 -16px 36px rgba(0, 0, 0, 0.85);
+  z-index: 3;
+}
+
+/* Promo Section Under Video (Scales dynamically to fill the remaining 25% height) */
+.promo-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  gap: clamp(44px, 4.5vw, 72px);
+  width: 100%;
+  max-width: min(820px, 92vw);
+  height: 20vh;
+  max-height: 20vh;
+  flex: 1;
+  padding: 4px 16px;
+  box-sizing: border-box;
+}
+
+/* Left Text Column */
+.promo-text-col {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  height: 100%;
+  flex: 1;
+  gap: clamp(6px, 1.1vh, 14px);
+}
+
+.promo-title {
+  margin: 0;
+  font-size: clamp(24px, 3.5vh, 44px);
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.4px;
   line-height: 1.1;
 }
 
-.reel-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: rgba(255,255,255,0.5);
-  text-transform: uppercase;
+.promo-sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: clamp(13px, 1.75vh, 21px);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+  line-height: 1.25;
 }
 
-.reel-id {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 18px;
-  font-weight: 700;
-  color: white;
+.promo-tag-handle {
+  color: #FF004F;
+  font-weight: 600;
+  text-shadow: 0 0 14px rgba(255, 0, 79, 0.45);
 }
 
-.preview-qr {
+.inline-tiktok-icon {
+  width: clamp(15px, 1.9vh, 23px);
+  height: clamp(15px, 1.9vh, 23px);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.promo-use-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+}
+
+.promo-hashtag {
+  font-size: inherit;
+  font-weight: 400;
+  color: #ffffff;
+  letter-spacing: 0.2px;
+  line-height: 1.25;
+  margin-right: 4px;
+}
+
+/* White QR Card on the Right - scales with remaining height */
+.promo-qr-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px 8px 6px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.75);
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
-.qr-image {
-  width: 120px;
-  height: 120px;
-  border-radius: 8px;
-  background: white;
-  padding: 6px;
+.promo-qr-image {
+  display: block;
+  object-fit: contain;
 }
 
-.qr-label {
-  font-size: 10px;
-  color: rgba(255,255,255,0.5);
+.promo-reel-id {
+  font-family: 'JetBrains Mono', -apple-system, sans-serif;
+  font-size: clamp(9px, 1.2vh, 13px);
+  font-weight: 500;
+  color: #000000;
+  margin-top: 3px;
   letter-spacing: 0.5px;
-}
-
-/* Queue position badge */
-.queue-indicator {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 11px;
-  color: rgba(255,255,255,0.6);
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 /* Idle state */
@@ -154,27 +657,27 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.4);
   text-align: center;
   padding: 40px;
   position: relative;
 }
 
 .idle-icon {
-  color: rgba(255,255,255,0.15);
+  color: rgba(255, 255, 255, 0.2);
   margin-bottom: 8px;
 }
 
 .idle-title {
   font-size: 20px;
   font-weight: 600;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .idle-sub {
   font-size: 13px;
-  color: rgba(255,255,255,0.25);
-  max-width: 240px;
+  color: rgba(255, 255, 255, 0.35);
+  max-width: 250px;
   line-height: 1.6;
 }
 
@@ -189,7 +692,7 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1px solid rgba(124,58,237,0.3);
+  border: 1.5px solid rgba(124, 58, 237, 0.4);
   animation: ringPulse 3s ease-out infinite;
 }
 
@@ -201,3 +704,4 @@
   0% { transform: scale(0.5); opacity: 0.8; }
   100% { transform: scale(2); opacity: 0; }
 }
+
