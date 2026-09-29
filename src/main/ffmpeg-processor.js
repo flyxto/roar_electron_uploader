@@ -26,16 +26,18 @@ try {
 }
 
 /**
- * Process video: apply 9:16 portrait crop (left/right only, keep height)
- * and optionally overlay a PNG frame on top.
+ * Process video: apply 9:16 portrait crop (left/right only, keep height),
+ * optionally overlay a PNG frame on top, and optionally replace audio with
+ * a looping background music track (original audio is discarded).
  *
  * @param {string} inputPath   - Source video file path
  * @param {string} outputPath  - Destination file path
- * @param {string|null} framePath - Optional PNG overlay frame
+ * @param {string|null} framePath    - Optional PNG overlay frame
  * @param {function} onProgress - Progress callback (0-100)
+ * @param {string|null} bgMusicPath  - Optional MP3 background music (replaces original audio)
  * @returns {Promise<string>} - resolves with output path
  */
-export function processVideo(inputPath, outputPath, framePath, onProgress) {
+export function processVideo(inputPath, outputPath, framePath, onProgress, bgMusicPath) {
   return new Promise((resolve, reject) => {
     // Get video metadata first to know dimensions
     ffmpeg.ffprobe(inputPath, (err, metadata) => {
@@ -58,24 +60,40 @@ export function processVideo(inputPath, outputPath, framePath, onProgress) {
       const cropX = Math.floor((originalWidth - cropWidth) / 2)
       const cropY = 0
 
+      const hasBgMusic = bgMusicPath && fs.existsSync(bgMusicPath)
+
       let cmd = ffmpeg(inputPath)
 
+      // Add background music as second input, looped to match video duration
+      if (hasBgMusic) {
+        cmd = cmd.input(bgMusicPath).inputOptions(['-stream_loop -1'])
+      }
+
       if (framePath && fs.existsSync(framePath)) {
-        // Overlay frame on top of the cropped video
+        // With frame overlay
+        const frameInputIndex = hasBgMusic ? 2 : 1
         cmd = cmd
           .input(framePath)
           .complexFilter([
-            // Step 1: crop video to 9:16
             `[0:v]crop=${cropWidth}:${cropHeight}:${cropX}:${cropY}[cropped]`,
-            // Step 2: scale overlay frame to match output size
-            `[1:v]scale=${cropWidth}:${cropHeight}[frame]`,
-            // Step 3: overlay frame on top of video
+            `[${frameInputIndex}:v]scale=${cropWidth}:${cropHeight}[frame]`,
             `[cropped][frame]overlay=0:0[out]`
           ])
-          .outputOptions(['-map [out]', '-map 0:a?'])
+
+        if (hasBgMusic) {
+          cmd = cmd.outputOptions(['-map [out]', '-map 1:a', '-shortest'])
+        } else {
+          cmd = cmd.outputOptions(['-map [out]', '-an'])
+        }
       } else {
-        // Just crop, no frame
+        // No frame overlay — just crop
         cmd = cmd.videoFilter(`crop=${cropWidth}:${cropHeight}:${cropX}:${cropY}`)
+
+        if (hasBgMusic) {
+          cmd = cmd.outputOptions(['-map 0:v', '-map 1:a', '-shortest'])
+        } else {
+          cmd = cmd.outputOptions(['-an'])
+        }
       }
 
       cmd

@@ -171,6 +171,16 @@ ipcMain.handle('select-frame-image', async () => {
   return result.filePaths[0]
 })
 
+// Open file picker for background music MP3
+ipcMain.handle('select-bg-music', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [{ name: 'Audio', extensions: ['mp3', 'aac', 'wav', 'm4a', 'ogg'] }]
+  })
+  if (result.canceled) return null
+  return result.filePaths[0]
+})
+
 // Forward video to preview window
 ipcMain.on('preview-video', (_event, data) => {
   const pw = getPreviewWindow()

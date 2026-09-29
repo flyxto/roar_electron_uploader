@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS = {
   watchFolder: '',
   outputFolder: '',
   framePath: '',
+  bgMusicPath: '',
   processedVideos: []
 }
 

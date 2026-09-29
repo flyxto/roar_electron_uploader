@@ -104,13 +104,14 @@ async function runPipeline(filePath, getPreviewWindowFn) {
 
     const outputPath = join(outputFolder, `${videoId}_processed.mp4`)
     const framePath = settings.framePath || null
+    const bgMusicPath = settings.bgMusicPath || null
 
     await processVideo(filePath, outputPath, framePath, (percent) => {
       job.progress = Math.round(percent * 0.6) // 0–60%
       job.status = 'processing'
       activeJobs.set(jobId, { ...job })
       broadcastToAll('job-update', { ...job })
-    })
+    }, bgMusicPath)
 
     job.localPath = outputPath
 

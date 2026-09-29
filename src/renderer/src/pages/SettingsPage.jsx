@@ -63,6 +63,13 @@ export default function SettingsPage({ settings, onUpdate }) {
     }
   }
 
+  const handleSelectBgMusic = async () => {
+    const path = await window.api.selectBgMusic()
+    if (path) {
+      setForm((prev) => ({ ...prev, bgMusicPath: path }))
+    }
+  }
+
   if (!settings) {
     return (
       <div style={{ padding: '40px', color: 'var(--text-muted)', textAlign: 'center' }}>
@@ -175,6 +182,25 @@ export default function SettingsPage({ settings, onUpdate }) {
                     </div>
                     <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
                       9:16 PNG with transparent center — overlaid on processed video via FFmpeg
+                    </p>
+                  </div>
+
+                  <div className="settings-field">
+                    <label className="label">Background Music (MP3)</label>
+                    <div className="folder-input-row">
+                      <input
+                        className="input"
+                        type="text"
+                        readOnly
+                        value={form.bgMusicPath || ''}
+                        placeholder="Optional MP3 to replace original video audio"
+                      />
+                      <button className="btn btn-secondary" onClick={handleSelectBgMusic}>
+                        Select
+                      </button>
+                    </div>
+                    <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      Audio is looped to match video duration — original audio is discarded
                     </p>
                   </div>
                 </>

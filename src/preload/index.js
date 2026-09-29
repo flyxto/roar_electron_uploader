@@ -9,6 +9,7 @@ const api = {
   // Folder / file pickers
   selectFolder: () => ipcRenderer.invoke('select-folder'),
   selectFrameImage: () => ipcRenderer.invoke('select-frame-image'),
+  selectBgMusic: () => ipcRenderer.invoke('select-bg-music'),
 
   // Watcher
   startWatcher: (folderPath) => ipcRenderer.invoke('start-watcher', folderPath),
