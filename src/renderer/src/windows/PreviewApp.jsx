@@ -19,13 +19,7 @@ function getInteractions(videoId) {
   return { likes, comments }
 }
 
-// Hardcoded TV display configuration
-const DISPLAY_CONFIG = {
-  videoHeightVh: 77,
-  paddingV: 80,
-  qrSizePx: 185,
-  textScale: 1.05
-}
+
 
 // Helper to format Windows/Unix paths to a safe local file:// URI
 function toLocalVideoSrc(localPath) {
@@ -427,21 +421,9 @@ export default function PreviewApp() {
       <div className="tv-frame">
         <div className="tv-screen">
           {displayedVideo ? (
-            <div
-              className="preview-layout"
-              style={{
-                paddingTop: `${DISPLAY_CONFIG.paddingV}px`,
-                paddingBottom: `${DISPLAY_CONFIG.paddingV}px`
-              }}
-            >
+            <div className="preview-layout">
               {/* Video Player (TikTok-style Vertical Feed Scroll) */}
-              <div
-                className="preview-stage"
-                style={{
-                  height: `${DISPLAY_CONFIG.videoHeightVh}vh`,
-                  maxHeight: `${DISPLAY_CONFIG.videoHeightVh}vh`
-                }}
-              >
+              <div className="preview-stage">
                 <div
                   className="tiktok-feed-viewport"
                   onClick={() => startScrollTransition()}
@@ -490,29 +472,22 @@ export default function PreviewApp() {
               <div className="promo-section">
                 {/* Left: Text & Hashtags */}
                 <div className="promo-text-col">
-                  <h2
-                    className="promo-title"
-                    style={{ fontSize: `clamp(22px, ${3.5 * DISPLAY_CONFIG.textScale}vh, ${44 * DISPLAY_CONFIG.textScale}px)` }}
-                  >
+                  <h2 className="promo-title">
                     Scan, Share & Win
                   </h2>
 
-                  <div
-                    className="promo-sub-row"
-                    style={{ fontSize: `clamp(13px, ${1.75 * DISPLAY_CONFIG.textScale}vh, ${21 * DISPLAY_CONFIG.textScale}px)` }}
-                  >
-                    <span>Tag</span>
-                    <TikTokLogo className="inline-tiktok-icon" />
-                    <span className="promo-tag-handle">@roar.adx</span>
-                  </div>
+                  <div className="promo-sub-block">
+                    <div className="promo-sub-row">
+                      <span>Tag</span>
+                      <TikTokLogo className="inline-tiktok-icon" />
+                      <span className="promo-tag-handle">@roar.adx</span>
+                    </div>
 
-                  <div
-                    className="promo-sub-row"
-                    style={{ fontSize: `clamp(13px, ${1.75 * DISPLAY_CONFIG.textScale}vh, ${21 * DISPLAY_CONFIG.textScale}px)` }}
-                  >
-                    <span className="promo-use-label">Use</span>
-                    <span className="promo-hashtag">#DigitalSummitAsia</span>
-                    <span className="promo-hashtag">#DMASLSummit2026</span>
+                    <div className="promo-sub-row">
+                      <span className="promo-use-label">Use</span>
+                      <span className="promo-hashtag">#DigitalSummitAsia</span>
+                      <span className="promo-hashtag">#DMASLSummit2026</span>
+                    </div>
                   </div>
                 </div>
 
@@ -523,15 +498,8 @@ export default function PreviewApp() {
                       src={qrDataUrl}
                       alt="QR Code"
                       className="promo-qr-image"
-                      style={{
-                        width: `${DISPLAY_CONFIG.qrSizePx}px`,
-                        height: `${DISPLAY_CONFIG.qrSizePx}px`
-                      }}
                     />
-                    <div
-                      className="promo-reel-id"
-                      style={{ fontSize: `clamp(9px, ${1.2 * DISPLAY_CONFIG.textScale}vh, ${14 * DISPLAY_CONFIG.textScale}px)` }}
-                    >
+                    <div className="promo-reel-id">
                       REEL NO - {displayedVideo.videoId}
                     </div>
                   </div>
