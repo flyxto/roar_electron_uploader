@@ -582,8 +582,8 @@ function TikTokVideoOverlay({ videoData }) {
           <div className="tiktok-handle-row">
             <span className="tiktok-handle">@roaradx</span>
           </div>
-          <p className="tiktok-caption">I was here at Tik Tok Accelerate</p>
-          <p className="tiktok-hashtags">#roaradx #tiktok #fun</p>
+          <p className="tiktok-caption">I was here at Digital Summit Asia 2026</p>
+          <p className="tiktok-hashtags">#DigitalSummitAsia #DMASLSummit2026 #roaradx</p>
 
           <div className="tiktok-sound-row">
             <svg
