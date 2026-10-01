@@ -513,8 +513,7 @@ export default function PreviewApp() {
                   <path d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
                 </svg>
               </div>
-              <p className="idle-title">Waiting for video...</p>
-              <p className="idle-sub">Videos will preview here once available in your output folder</p>
+              <p className="idle-title">Get Ready</p>
               <div className="idle-dot-ring">
                 <div className="dot-ring" />
                 <div className="dot-ring dot-ring-2" />
@@ -582,8 +581,8 @@ function TikTokVideoOverlay({ videoData }) {
           <div className="tiktok-handle-row">
             <span className="tiktok-handle">@roaradx</span>
           </div>
-          <p className="tiktok-caption">I was here at Tik Tok Accelerate</p>
-          <p className="tiktok-hashtags">#roaradx #tiktok #fun</p>
+          <p className="tiktok-caption">I was here at Digital Summit Asia</p>
+          <p className="tiktok-hashtags">#roaradx #DMASLSummit2026</p>
 
           <div className="tiktok-sound-row">
             <svg
